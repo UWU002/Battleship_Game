@@ -149,7 +149,13 @@ public class Main {
         while (!exit) {
             userSelection = scanner.next().toLowerCase().charAt(0);
             if (userSelection == 'y') {
-                System.out.println("Welcome to Battleship! In this game, you play against another player or a computer. Begin by entering your name. You can choose to manually place your ships on the board or let the game do it automatically. The gameplay involves taking turns to guess the location of your opponent's ships by specifying a row and column. You'll get feedback on whether it's a hit or a miss. The first to sink all of the opponent's ships wins. Remember to watch for patterns in your opponent's ship placement and adjust your strategy. Enjoy the game!l");
+                System.out.println("""
+                        Welcome to Battleship! In this game, you play against another player or a computer.\s
+                        Begin by entering your name. You can choose to manually place your ships on the board or let the game\s
+                        do it automatically. The gameplay involves taking turns to guess the location of your opponent's ships \s
+                        by specifying a row and column. You'll get feedback on whether it's a hit or a miss. The first to sink \s
+                        all of the opponent's ships wins. Remember to watch for patterns in your opponent's ship placement and \s
+                        adjust your strategy. Enjoy the game!l""");
                 exit = true;
             } else if (userSelection == 'n') {
                 System.out.println("The game will Start now");
