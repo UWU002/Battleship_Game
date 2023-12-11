@@ -19,7 +19,7 @@ public class Main {
         int roundCounter = 0, playerRecevedHits = 0, enemyRecevedHits = 0;
         int botDifficulty;
         //Game logic
-        boolean isHit;
+        boolean isHit= false;
 
         introduction();
         tutorial();
@@ -35,7 +35,7 @@ public class Main {
         do {
             whoShootsMsg(roundCounter, player1Name, player2Name);
             DisplayEnemyBoard(playerShipLocations, enemyShipLocations, roundCounter, player1Name, player2Name);
-            isHit = Shoot(roundCounter, playerShipLocations, playerSunkCheck, enemySunkCheck, enemyShipLocations, gameMode, botDifficulty);
+            isHit = Shoot(roundCounter, playerShipLocations, playerSunkCheck, enemySunkCheck, enemyShipLocations, gameMode, botDifficulty, isHit);
             checkForSunk(playerShipLocations, enemyShipLocations, playerSunkCheck, enemySunkCheck, roundCounter);
             DisplayOwnBoard(playerShipLocations, enemyShipLocations, roundCounter);
             infoMessage();
@@ -696,17 +696,15 @@ public class Main {
         }
     }
 
-    private static boolean Shoot(int roundCounter, int[][] playerShipLocations, String[][] playerSunkCheck, String[][] enemySunkCheck, int[][] enemyShipLocations, int gameMode, int botDifficulty) {
-        boolean hitOrMiss = false;
+    private static boolean Shoot(int roundCounter, int[][] playerShipLocations, String[][] playerSunkCheck, String[][] enemySunkCheck, int[][] enemyShipLocations, int gameMode, int botDifficulty, boolean hitOrMiss) {
         if ((!(roundCounter % 2 == 0)) && gameMode == 1) {
-
             switch (botDifficulty) {
                 case 1:
-                    hitOrMiss = Bot.easyBot(roundCounter, playerShipLocations);
+                    hitOrMiss = Bot.easyBot(playerShipLocations, playerSunkCheck);
                 case 2:
-                    hitOrMiss = Bot.MediumBot(roundCounter, playerShipLocations, hitOrMiss);
+                    hitOrMiss = Bot.MediumBot(playerShipLocations, hitOrMiss, playerSunkCheck);
                 case 3:
-                    hitOrMiss = Bot.HardBot(roundCounter, playerShipLocations, hitOrMiss);
+                    hitOrMiss = Bot.HardBot(playerShipLocations, hitOrMiss, playerSunkCheck);
             }
 
             return hitOrMiss;

@@ -6,7 +6,7 @@ public class Bot {
     private  static  int[] lastRow= new int[1];
     private static int[] lastCol= new int[1];
 
-    public static boolean easyBot(int roundCounter, int[][] playerShipLocations) {
+    public static boolean easyBot(int[][] playerShipLocations, String[][]PlayerSunkCheck) {
 
         Random random = new Random();
 
@@ -22,6 +22,7 @@ public class Bot {
 
         if (playerShipLocations[row][col] == 1) {
             playerShipLocations[row][col] = 2;
+            PlayerSunkCheck[row][col] = PlayerSunkCheck[row][col] + "S";
             return true; // Hit
         } else {
             playerShipLocations[row][col] = 3;
@@ -29,7 +30,7 @@ public class Bot {
         }
     }
 
-    public static boolean MediumBot(int roundCounter, int[][] playerShipLocations,boolean hitOrMiss) {
+    public static boolean MediumBot(int[][] playerShipLocations,boolean hitOrMiss, String[][]PlayerSunkCheck) {
         Random random = new Random();
         int row, col;
 
@@ -46,6 +47,7 @@ public class Bot {
 
             if (playerShipLocations[row][col] == 1) {
                 playerShipLocations[row][col] = 2;
+                PlayerSunkCheck[row][col] = PlayerSunkCheck[row][col] + "S";
                 hitOrMiss = true; // Hit
             } else {
                 playerShipLocations[row][col] = 3;
@@ -59,7 +61,7 @@ public class Bot {
         return hitOrMiss;
     }
 
-    public static boolean HardBot(int roundCounter, int[][] playerShipLocations,boolean hitOrMiss) {
+    public static boolean HardBot(int[][] playerShipLocations,boolean hitOrMiss, String[][]PlayerSunkCheck) {
 
 
         return false;
