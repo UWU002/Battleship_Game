@@ -1,6 +1,6 @@
 import java.util.Scanner;
 import java.util.Random;
-//Hola
+
 public class Main {
     public static final String CReset = "\u001B[0m";
     public static final String CGreen = "\u001B[32m";
