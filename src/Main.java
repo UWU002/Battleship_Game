@@ -4,6 +4,7 @@ import java.util.Random;
 public class Main {
     public static final String CReset = "\u001B[0m";
     public static final String CGreen = "\u001B[32m";
+    public static final String CYellow = "\u001B[33m";
     public static final String CRed = "\u001B[31m";
 
 
@@ -18,6 +19,10 @@ public class Main {
         int[] hits;
         int roundCounter = 0, playerRecevedHits = 0, enemyRecevedHits = 0;
         int botDifficulty;
+        //Shop
+        int coins = 0;
+        int[] items = new int[10];
+        int[] specialItems = new int[10];
         //Game logic
         boolean isHit = false, gameWon = false;
 
@@ -35,36 +40,104 @@ public class Main {
 
         while (!gameWon) {
             whoShootsMsg(roundCounter, player1Name, player2Name, gameMode);
+            coinAmount(coins, gameMode, roundCounter);
             DisplayEnemyBoard(playerShipLocations, enemyShipLocations, roundCounter, gameMode);
             isHit = Shoot(roundCounter, playerShipLocations, playerSunkCheck, enemySunkCheck, enemyShipLocations, gameMode, botDifficulty, isHit);
-            checkForSunk(playerShipLocations, enemyShipLocations, playerSunkCheck, enemySunkCheck, roundCounter);
+            coins = checkForSunk(playerShipLocations, enemyShipLocations, playerSunkCheck, enemySunkCheck, roundCounter, coins);
             DisplayOwnBoard(playerShipLocations, enemyShipLocations, roundCounter, gameMode);
+            enterShop(coins, items, specialItems, roundCounter);
             infoMessage(gameMode, roundCounter);
             roundCounter = roundCounter(isHit, roundCounter);
-            hits = checkHits(playerShipLocations, enemyShipLocations, playerRecevedHits, enemyRecevedHits, roundCounter);
-            playerRecevedHits = hits[0];
-            enemyRecevedHits = hits[1];
+            coins = giveCoins(coins, isHit, roundCounter);
+            gameWon = whoWon(enemySunkCheck, playerSunkCheck, gameWon, player1Name, player2Name);
+        }
+    }
 
-
-            if (winCon(enemySunkCheck)) {
-                System.out.println(player1Name + " has won the game!");
-                gameWon = true;
-                continue;
-            }
-            if (winCon(playerSunkCheck)) {
-                System.out.println(player2Name + " has won the game!");
-                gameWon = true;
-                continue;
+    private static void enterShop(int coins, int[] items, int[] specialItems, int turn) {
+        char enterShop;
+        int shopSection;
+        boolean exit = false;
+        if (turn % 2 == 0) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Would you like to enter the shop?");
+            System.out.println("You have " + CYellow + coins + CReset + " coins");
+            while (!exit) {
+                enterShop = scanner.next().toLowerCase().charAt(0);
+                if (enterShop == 'y') {
+                    System.out.println("To which section of the shop would you like to go?");
+                    System.out.println("""
+                            Normal Items[1]
+                            Special Items[2]
+                            Exit Shop[3]
+                            """);
+                    shopSection = scanner.nextInt();
+                    while (shopSection > 3 || shopSection < 1) {
+                        System.out.println("Please just type [1], [2] or [3]");
+                        shopSection = scanner.nextInt();
+                    }
+                    switch (shopSection) {
+                        case 1:
+                            shop.normalShop(coins, items);
+                            break;
+                        case 2:
+                            shop.specialShop(coins, specialItems);
+                            break;
+                        case 3:
+                            return;
+                    }
+                } else if (enterShop == 'n') {
+                    return;
+                } else {
+                    System.out.println("Please just type yes or no");
+                }
             }
         }
+
+
+    }
+
+    private static int giveCoins(int coins, boolean hit, int roundCounter) {
+        if (roundCounter % 2 == 0) {
+            if (hit) {
+                return coins + 1;
+            }
+        }
+        return coins;
+    }
+
+    private static void coinAmount(int coins, int gameMode, int roundCounter) {
+        if (roundCounter % 2 == 0) {
+            if (gameMode == 1) {
+                System.out.println("you have " + CYellow + coins + CReset + " coins");
+            }
+        }
+    }
+
+    private static boolean whoWon(String[][] enemySunkCheck, String[][] playerSunkCheck, boolean gameWon, String player1Name, String player2Name) {
+        if (winCon(enemySunkCheck)) {
+            System.out.println(player1Name + " has won the game!");
+            gameWon = true;
+        }
+        if (winCon(playerSunkCheck)) {
+            System.out.println(player2Name + " has won the game!");
+            gameWon = true;
+        }
+        return gameWon;
     }
 
 
     private static boolean winCon(String[][] sunkCheck) {
         for (int row = 0; row < sunkCheck.length; row++) {
             for (int col = 0; col < sunkCheck[row].length; col++) {
-                if (sunkCheck[row][col].equals("S")) { // Assuming "S" marks a part of a ship
-                    return false; // If any ship part is found, the game is not over
+                if (sunkCheck[row][col] != null) {
+                    try {
+                        int shipPart = Integer.parseInt(sunkCheck[row][col]);
+                        if (shipPart >= 1 && shipPart <= 9) {
+                            return false;
+                        }
+                    } catch (NumberFormatException e) {
+                        // Not a number, so we ignore this cell
+                    }
                 }
             }
         }
@@ -85,7 +158,7 @@ public class Main {
             System.out.print(".");
         } else {
             Scanner scanner = new Scanner(System.in);
-            System.out.println("Press enter when you're ready");
+            System.out.println(CGreen + "Press enter to continue" + CReset);
             scanner.nextLine();
             for (int i = 0; i < 100; i++) {
                 System.out.println();
@@ -93,10 +166,10 @@ public class Main {
         }
     }
 
-    private static void checkForSunk(int[][] playerShipLocations, int[][] enemyShipLocations, String[][] playerSunkCheck, String[][] enemySunkCheck, int roundCounter) {
+    private static int checkForSunk(int[][] playerShipLocations, int[][] enemyShipLocations, String[][] playerSunkCheck, String[][] enemySunkCheck, int roundCounter, int coins) {
+        boolean giveCoins = false;
         for (int num = 0; num <= 9; num++) {
             boolean numberFound = false;
-
             for (String[] row : enemySunkCheck) {
                 for (String element : row) {
                     if (element != null && element.equals(String.valueOf(num))) {
@@ -114,6 +187,7 @@ public class Main {
                     for (int j = 0; j < enemySunkCheck[i].length; j++) {
                         if (enemySunkCheck[i][j] != null && enemySunkCheck[i][j].equals(searchString)) {
                             enemyShipLocations[i][j] = 5;
+                            giveCoins = true;
                         }
                     }
                 }
@@ -144,8 +218,10 @@ public class Main {
                 }
             }
         }
-
-
+        if (giveCoins) {
+            coins += 5;
+        }
+        return coins;
     }
 
 
@@ -711,7 +787,13 @@ public class Main {
             System.out.println("Its " + playerName1 + "'s turn");
         } else {
             if (gameMode == 1) {
-                System.out.print(".");
+                System.out.print(playerName2+" is shooting, please wait");
+                try {
+                    Thread.sleep(3000);
+
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 System.out.println("Its " + playerName2 + "'s turn");
             }
@@ -794,27 +876,6 @@ public class Main {
             }
         }
 
-    }
-
-    private static int[] checkHits(int[][] playerShipLocations, int[][] enemyShipLocations, int playerRecevedHits, int enemyRecevedHits, int roundCounter) {
-        if (roundCounter % 2 == 0) {
-            for (int i = 0; i < playerShipLocations.length; i++) {
-                for (int j = 0; j < playerShipLocations[i].length; j++) {
-                    if (playerShipLocations[i][j] == 2) {
-                        playerRecevedHits++;
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < enemyShipLocations.length; i++) {
-                for (int j = 0; j < enemyShipLocations[i].length; j++) {
-                    if (enemyShipLocations[i][j] == 2) {
-                        enemyRecevedHits++;
-                    }
-                }
-            }
-        }
-        return new int[]{playerRecevedHits, enemyRecevedHits};
     }
 
     // Game Display
