@@ -2,7 +2,7 @@ import java.util.Random;
 
 public class Bot {
 
-    private enum State {
+        private enum State {
         SEARCH, TARGET
     }
 
@@ -60,47 +60,48 @@ public class Bot {
         } else {
             // In TARGET mode
             hit = false;
-            do {
-                int[] nextTarget = getNextTarget(lastHitRow, lastHitCol);
-                row = nextTarget[0];
-                col = nextTarget[1];
+            int[] nextTarget = getNextTarget(lastHitRow, lastHitCol);
+            row = nextTarget[0];
+            col = nextTarget[1];
 
-                if (row >= 0 && row < 9 && col >= 0 && col < 9 && playerShipLocations[row][col] < 2) {
-                    if (playerShipLocations[row][col] == 1) {
-                        playerShipLocations[row][col] = 2;
-                        PlayerSunkCheck[row][col] += "S";
-                        lastHitRow = row;
-                        lastHitCol = col;
-                        hit = true;
-                        break;
-                    } else {
-                        playerShipLocations[row][col] = 3;
-                        targetDirection = (targetDirection + 1) % 4;
-                    }
+            if (row >= 0 && row < 9 && col >= 0 && col < 9) {
+                if (playerShipLocations[row][col] == 1) {
+                    playerShipLocations[row][col] = 2;
+                    PlayerSunkCheck[row][col] += "S";
+                    lastHitRow = row;
+                    lastHitCol = col;
+                    return true; // Hit
                 } else {
+                    playerShipLocations[row][col] = 3;
+                    state = State.SEARCH;
                     targetDirection = (targetDirection + 1) % 4;
+                    return false; // Miss
                 }
-            } while (targetDirection != 0);
-
-            if (!hit) {
+            } else {
                 state = State.SEARCH;
+                targetDirection = (targetDirection + 1) % 4;
+                return false;
             }
-            return hit;
         }
     }
 
     private static int[] getNextTarget(int row, int col) {
         switch (targetDirection) {
-            case 0: return new int[]{row, col + 1}; // Right
-            case 1: return new int[]{row + 1, col}; // Down
-            case 2: return new int[]{row, col - 1}; // Left
-            case 3: return new int[]{row - 1, col}; // Up
-            default: return new int[]{row, col};
+            case 0:
+                return new int[]{row, col + 1}; // Right
+            case 1:
+                return new int[]{row + 1, col}; // Down
+            case 2:
+                return new int[]{row, col - 1}; // Left
+            case 3:
+                return new int[]{row - 1, col}; // Up
+            default:
+                return new int[]{row, col};
         }
     }
 
 
-    public static boolean HardBot(int[][] playerShipLocations, String[][]PlayerSunkCheck) {
+    public static boolean HardBot(int[][] playerShipLocations, String[][] PlayerSunkCheck) {
 
 
         return false;

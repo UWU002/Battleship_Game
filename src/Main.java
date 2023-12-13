@@ -19,7 +19,7 @@ public class Main {
         int roundCounter = 0, playerRecevedHits = 0, enemyRecevedHits = 0;
         int botDifficulty;
         //Game logic
-        boolean isHit = false;
+        boolean isHit = false, gameWon = false;
 
         introduction();
         tutorial();
@@ -32,7 +32,8 @@ public class Main {
         checkGamemode(playerShipLocations, enemyShipLocations, roundCounter, gameMode, playerSunkCheck, enemySunkCheck);
         roundCounter++;
 
-        do {
+
+        while (!gameWon) {
             whoShootsMsg(roundCounter, player1Name, player2Name, gameMode);
             DisplayEnemyBoard(playerShipLocations, enemyShipLocations, roundCounter, gameMode);
             isHit = Shoot(roundCounter, playerShipLocations, playerSunkCheck, enemySunkCheck, enemyShipLocations, gameMode, botDifficulty, isHit);
@@ -43,9 +44,31 @@ public class Main {
             hits = checkHits(playerShipLocations, enemyShipLocations, playerRecevedHits, enemyRecevedHits, roundCounter);
             playerRecevedHits = hits[0];
             enemyRecevedHits = hits[1];
-        } while (playerRecevedHits < 30 && enemyRecevedHits < 30);
 
-        whoWon(playerRecevedHits, player1Name, player2Name);
+
+            if (winCon(enemySunkCheck)) {
+                System.out.println(player1Name + " has won the game!");
+                gameWon = true;
+                continue;
+            }
+            if (winCon(playerSunkCheck)) {
+                System.out.println(player2Name + " has won the game!");
+                gameWon = true;
+                continue;
+            }
+        }
+    }
+
+
+    private static boolean winCon(String[][] sunkCheck) {
+        for (int row = 0; row < sunkCheck.length; row++) {
+            for (int col = 0; col < sunkCheck[row].length; col++) {
+                if (sunkCheck[row][col].equals("S")) { // Assuming "S" marks a part of a ship
+                    return false; // If any ship part is found, the game is not over
+                }
+            }
+        }
+        return true;
     }
 
     private static int roundCounter(boolean isHit, int roundCounter) {
@@ -60,7 +83,7 @@ public class Main {
     private static void infoMessage(int gameMode, int turn) {
         if (gameMode == 1 && !(turn % 2 == 0)) {
             System.out.print(".");
-        }else {
+        } else {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Press enter when you're ready");
             scanner.nextLine();
@@ -125,18 +148,6 @@ public class Main {
 
     }
 
-
-    private static void whoWon(int playerRecevedHits, String player1Name, String player2Name) {
-        if (playerRecevedHits < 30) {
-            System.out.println("All Ships Sunk!!");
-            System.out.println(player1Name + " won!");
-
-        } else {
-            System.out.println("All Ships Sunk!!");
-            System.out.println(player2Name + " won!");
-        }
-
-    }
 
     // Game Initialization
     private static void introduction() {
@@ -281,7 +292,7 @@ public class Main {
                     } else {
                         enemyShipLocations = new int[10][10];
                     }
-                    length= 0;
+                    length = 0;
                 }
 
                 if (placementConfirmation(row, col, direction, length, PlayerShips, enemyShipLocations, roundCounter)) {
@@ -438,7 +449,7 @@ public class Main {
         DisplayOwnBoard(PlayerShips, enemyShipLocations, roundCounter, gameMode);
 
 
-        if (gameMode == 2 && !(roundCounter % 2==0)) {
+        if (gameMode == 2 && !(roundCounter % 2 == 0)) {
             System.out.println("This is your board, press enter to continue");
             scanner.nextLine();
             for (int i = 0; i < 100; i++) {
