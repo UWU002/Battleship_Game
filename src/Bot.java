@@ -2,11 +2,16 @@ import java.util.Random;
 
 public class Bot {
 
+    private enum State {
+        SEARCH, TARGET
+    }
 
-    private  static  int[] lastRow= new int[1];
-    private static int[] lastCol= new int[1];
+    private static State state = State.SEARCH;
+    private static int lastHitRow = -1;
+    private static int lastHitCol = -1;
+    private static int targetDirection = 0; // 0: Right, 1: Down, 2: Left, 3: Up
 
-    public static boolean easyBot(int[][] playerShipLocations, String[][]PlayerSunkCheck) {
+    public static boolean easyBot(int[][] playerShipLocations, String[][] PlayerSunkCheck) {
 
         Random random = new Random();
 
@@ -30,38 +35,72 @@ public class Bot {
         }
     }
 
-    public static boolean MediumBot(int[][] playerShipLocations,boolean hitOrMiss, String[][]PlayerSunkCheck) {
+    public static boolean MediumBot(int[][] playerShipLocations, String[][] PlayerSunkCheck) {
         Random random = new Random();
         int row, col;
+        boolean hit;
 
-        if (!hitOrMiss) {
-            row = random.nextInt(9);
-            col = random.nextInt(9);
-
-            while (playerShipLocations[row][col] == 2 || playerShipLocations[row][col] == 3) {
+        if (state == State.SEARCH) {
+            do {
                 row = random.nextInt(9);
                 col = random.nextInt(9);
-            }
-            lastRow[0]= row;
-            lastCol[0]= col;
+            } while (playerShipLocations[row][col] >= 2);
 
             if (playerShipLocations[row][col] == 1) {
+                state = State.TARGET;
+                lastHitRow = row;
+                lastHitCol = col;
                 playerShipLocations[row][col] = 2;
-                PlayerSunkCheck[row][col] = PlayerSunkCheck[row][col] + "S";
-                hitOrMiss = true; // Hit
+                PlayerSunkCheck[row][col] += "S";
+                return true; // Hit
             } else {
                 playerShipLocations[row][col] = 3;
-                hitOrMiss = false; // Miss
+                return false; // Miss
             }
         } else {
+            // In TARGET mode
+            hit = false;
+            do {
+                int[] nextTarget = getNextTarget(lastHitRow, lastHitCol);
+                row = nextTarget[0];
+                col = nextTarget[1];
 
+                if (row >= 0 && row < 9 && col >= 0 && col < 9 && playerShipLocations[row][col] < 2) {
+                    if (playerShipLocations[row][col] == 1) {
+                        playerShipLocations[row][col] = 2;
+                        PlayerSunkCheck[row][col] += "S";
+                        lastHitRow = row;
+                        lastHitCol = col;
+                        hit = true;
+                        break;
+                    } else {
+                        playerShipLocations[row][col] = 3;
+                        targetDirection = (targetDirection + 1) % 4;
+                    }
+                } else {
+                    targetDirection = (targetDirection + 1) % 4;
+                }
+            } while (targetDirection != 0);
 
+            if (!hit) {
+                state = State.SEARCH;
+            }
+            return hit;
         }
-
-        return hitOrMiss;
     }
 
-    public static boolean HardBot(int[][] playerShipLocations,boolean hitOrMiss, String[][]PlayerSunkCheck) {
+    private static int[] getNextTarget(int row, int col) {
+        switch (targetDirection) {
+            case 0: return new int[]{row, col + 1}; // Right
+            case 1: return new int[]{row + 1, col}; // Down
+            case 2: return new int[]{row, col - 1}; // Left
+            case 3: return new int[]{row - 1, col}; // Up
+            default: return new int[]{row, col};
+        }
+    }
+
+
+    public static boolean HardBot(int[][] playerShipLocations, String[][]PlayerSunkCheck) {
 
 
         return false;

@@ -19,26 +19,26 @@ public class Main {
         int roundCounter = 0, playerRecevedHits = 0, enemyRecevedHits = 0;
         int botDifficulty;
         //Game logic
-        boolean isHit= false;
+        boolean isHit = false;
 
         introduction();
         tutorial();
         gameMode = gameMode();
         botDifficulty = botDifficulty(gameMode);
         player1Name = definePlayerName(gameMode, roundCounter);
-        autoOrManual(playerShipLocations, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck);
+        autoOrManual(playerShipLocations, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck, gameMode);
         roundCounter++;
         player2Name = definePlayerName(gameMode, roundCounter);
         checkGamemode(playerShipLocations, enemyShipLocations, roundCounter, gameMode, playerSunkCheck, enemySunkCheck);
         roundCounter++;
 
         do {
-            whoShootsMsg(roundCounter, player1Name, player2Name);
-            DisplayEnemyBoard(playerShipLocations, enemyShipLocations, roundCounter, player1Name, player2Name);
+            whoShootsMsg(roundCounter, player1Name, player2Name, gameMode);
+            DisplayEnemyBoard(playerShipLocations, enemyShipLocations, roundCounter, gameMode);
             isHit = Shoot(roundCounter, playerShipLocations, playerSunkCheck, enemySunkCheck, enemyShipLocations, gameMode, botDifficulty, isHit);
             checkForSunk(playerShipLocations, enemyShipLocations, playerSunkCheck, enemySunkCheck, roundCounter);
-            DisplayOwnBoard(playerShipLocations, enemyShipLocations, roundCounter);
-            infoMessage();
+            DisplayOwnBoard(playerShipLocations, enemyShipLocations, roundCounter, gameMode);
+            infoMessage(gameMode, roundCounter);
             roundCounter = roundCounter(isHit, roundCounter);
             hits = checkHits(playerShipLocations, enemyShipLocations, playerRecevedHits, enemyRecevedHits, roundCounter);
             playerRecevedHits = hits[0];
@@ -57,12 +57,16 @@ public class Main {
     }
 
 
-    private static void infoMessage() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Press enter when you're ready");
-        scanner.nextLine();
-        for (int i = 0; i < 100; i++) {
-            System.out.println();
+    private static void infoMessage(int gameMode, int turn) {
+        if (gameMode == 1 && !(turn % 2 == 0)) {
+            System.out.print(".");
+        }else {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Press enter when you're ready");
+            scanner.nextLine();
+            for (int i = 0; i < 100; i++) {
+                System.out.println();
+            }
         }
     }
 
@@ -235,13 +239,13 @@ public class Main {
     // Ship Placement
     private static void checkGamemode(int[][] PlayerShips, int[][] enemyShipLocations, int roundCounter, int gameMode, String[][] playerSunkCheck, String[][] enemySunkCheck) {
         if (gameMode == 2) {
-            autoOrManual(PlayerShips, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck);
+            autoOrManual(PlayerShips, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck, gameMode);
         } else {
-            AutomaticPlacement(PlayerShips, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck);
+            AutomaticPlacement(PlayerShips, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck, gameMode);
         }
     }
 
-    private static void autoOrManual(int[][] PlayerShips, int[][] enemyShipLocations, int roundCounter, String[][] playerSunkCheck, String[][] enemySunkCheck) {
+    private static void autoOrManual(int[][] PlayerShips, int[][] enemyShipLocations, int roundCounter, String[][] playerSunkCheck, String[][] enemySunkCheck, int gameMode) {
         Scanner scanner = new Scanner(System.in);
         char manualOrRandom;
         System.out.println("Would you like to place your ships manually or randomly?");
@@ -251,13 +255,13 @@ public class Main {
             manualOrRandom = scanner.next().toLowerCase().charAt(0);
         }
         if (manualOrRandom == 'm') {
-            ManualPlacement(PlayerShips, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck);
+            ManualPlacement(PlayerShips, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck, gameMode);
         } else {
-            AutomaticPlacement(PlayerShips, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck);
+            AutomaticPlacement(PlayerShips, enemyShipLocations, roundCounter, playerSunkCheck, enemySunkCheck, gameMode);
         }
     }
 
-    private static void AutomaticPlacement(int[][] PlayerShips, int[][] enemyShipLocations, int roundCounter, String[][] playerSunkCheck, String[][] enemySunkCheck) {
+    private static void AutomaticPlacement(int[][] PlayerShips, int[][] enemyShipLocations, int roundCounter, String[][] playerSunkCheck, String[][] enemySunkCheck, int gameMode) {
         Scanner scanner = new Scanner(System.in);
         int[] shipLengths = {5, 4, 4, 3, 3, 3, 2, 2, 2, 2};
         Random random = new Random();
@@ -277,6 +281,7 @@ public class Main {
                     } else {
                         enemyShipLocations = new int[10][10];
                     }
+                    length= 0;
                 }
 
                 if (placementConfirmation(row, col, direction, length, PlayerShips, enemyShipLocations, roundCounter)) {
@@ -430,17 +435,19 @@ public class Main {
                 }
             }
         }
-        DisplayOwnBoard(PlayerShips, enemyShipLocations, roundCounter);
+        DisplayOwnBoard(PlayerShips, enemyShipLocations, roundCounter, gameMode);
 
 
-        System.out.println("This is your board, press enter to continue");
-        scanner.nextLine();
-        for (int i = 0; i < 100; i++) {
-            System.out.println();
+        if (gameMode == 2 && !(roundCounter % 2==0)) {
+            System.out.println("This is your board, press enter to continue");
+            scanner.nextLine();
+            for (int i = 0; i < 100; i++) {
+                System.out.println();
+            }
         }
     }
 
-    private static void ManualPlacement(int[][] PlayerShips, int[][] enemyShipLocations, int roundCounter, String[][] playerSunkCheck, String[][] enemySunkCheck) {
+    private static void ManualPlacement(int[][] PlayerShips, int[][] enemyShipLocations, int roundCounter, String[][] playerSunkCheck, String[][] enemySunkCheck, int gameMode) {
         int[] ShipLength = {5, 4, 4, 3, 3, 3, 2, 2, 2, 2};
         boolean placement;
         char direction;
@@ -621,7 +628,7 @@ public class Main {
                 }
 
             }
-            DisplayOwnBoard(PlayerShips, enemyShipLocations, roundCounter);
+            DisplayOwnBoard(PlayerShips, enemyShipLocations, roundCounter, gameMode);
             System.out.println("This is your board, press enter to continue");
             scanner.nextLine().charAt(0);
             for (int m = 0; m < 100; m++) {
@@ -688,11 +695,15 @@ public class Main {
     }
 
     // GamePlay
-    private static void whoShootsMsg(int playerTurn, String playerName1, String playerName2) {
+    private static void whoShootsMsg(int playerTurn, String playerName1, String playerName2, int gameMode) {
         if (playerTurn % 2 == 0) {
             System.out.println("Its " + playerName1 + "'s turn");
         } else {
-            System.out.println("Its " + playerName2 + "'s turn");
+            if (gameMode == 1) {
+                System.out.print(".");
+            } else {
+                System.out.println("Its " + playerName2 + "'s turn");
+            }
         }
     }
 
@@ -701,13 +712,16 @@ public class Main {
             switch (botDifficulty) {
                 case 1:
                     hitOrMiss = Bot.easyBot(playerShipLocations, playerSunkCheck);
+                    break;
                 case 2:
-                    hitOrMiss = Bot.MediumBot(playerShipLocations, hitOrMiss, playerSunkCheck);
+                    hitOrMiss = Bot.MediumBot(playerShipLocations, playerSunkCheck);
+                    break;
                 case 3:
-                    hitOrMiss = Bot.HardBot(playerShipLocations, hitOrMiss, playerSunkCheck);
+                    hitOrMiss = Bot.HardBot(playerShipLocations, playerSunkCheck);
+                    break;
             }
-
             return hitOrMiss;
+
         } else {
 
             Scanner scanner = new Scanner(System.in);
@@ -793,7 +807,7 @@ public class Main {
     }
 
     // Game Display
-    private static void DisplayOwnBoard(int[][] playerShipLocations, int[][] enemyShipLocations, int roundCounter) {
+    private static void DisplayOwnBoard(int[][] playerShipLocations, int[][] enemyShipLocations, int roundCounter, int gameMode) {
         Scanner scanner = new Scanner(System.in);
         if (roundCounter % 2 == 0) {
             System.out.println("This is your own board, check where you've been hit");
@@ -814,27 +828,32 @@ public class Main {
                 System.out.println();
             }
         } else {
-            System.out.println("This is your own board, check where you've been hit");
-            for (int i = 0; i < 10; i++) {
-                for (int j = 0; j < 10; j++) {
-                    if (enemyShipLocations[i][j] == 0) {
-                        System.out.print("\uD83D\uDFE6 "); // Water
-                    } else if (enemyShipLocations[i][j] == 1) {
-                        System.out.print("\uD83D\uDD33 "); // Ship
-                    } else if (enemyShipLocations[i][j] == 2) {
-                        System.out.print("\uD83D\uDFE5 "); // Hit
-                    } else if (enemyShipLocations[i][j] == 3) {
-                        System.out.print("⬜ "); // Miss
-                    } else if (enemyShipLocations[i][j] == 5) {
-                        System.out.print("\uD83D\uDFEB "); // Sunk
+            if (gameMode == 1) {
+                System.out.println(".");
+            } else {
+
+                System.out.println("This is your own board, check where you've been hit");
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 10; j++) {
+                        if (enemyShipLocations[i][j] == 0) {
+                            System.out.print("\uD83D\uDFE6 "); // Water
+                        } else if (enemyShipLocations[i][j] == 1) {
+                            System.out.print("\uD83D\uDD33 "); // Ship
+                        } else if (enemyShipLocations[i][j] == 2) {
+                            System.out.print("\uD83D\uDFE5 "); // Hit
+                        } else if (enemyShipLocations[i][j] == 3) {
+                            System.out.print("⬜ "); // Miss
+                        } else if (enemyShipLocations[i][j] == 5) {
+                            System.out.print("\uD83D\uDFEB "); // Sunk
+                        }
                     }
+                    System.out.println();
                 }
-                System.out.println();
             }
         }
     }
 
-    private static void DisplayEnemyBoard(int[][] playerShipLocations, int[][] enemyShipLocations, int roundCounter, String Player1Name, String Player2Name) {
+    private static void DisplayEnemyBoard(int[][] playerShipLocations, int[][] enemyShipLocations, int roundCounter, int gameMode) {
         if (roundCounter % 2 == 0) {
             System.out.println("This is where you've shot");
             for (int i = 0; i < 10; i++) {
@@ -845,27 +864,31 @@ public class Main {
                         System.out.print("\uD83D\uDFE5 "); // Hit
                     } else if (enemyShipLocations[i][j] == 3) {
                         System.out.print("⬜ "); // Miss
-                    }else if (enemyShipLocations[i][j] == 5) {
-                        System.out.print("\uD83D\uDFEB"); // Sunk
+                    } else if (enemyShipLocations[i][j] == 5) {
+                        System.out.print("\uD83D\uDFEB "); // Sunk
                     }
                 }
                 System.out.println();
             }
         } else {
-            System.out.println("This is where you've shot");
-            for (int i = 0; i < 10; i++) {
-                for (int j = 0; j < 10; j++) {
-                    if (playerShipLocations[i][j] == 0 | playerShipLocations[i][j] == 1) {
-                        System.out.print("\uD83D\uDFE6 "); // Water
-                    } else if (playerShipLocations[i][j] == 2) {
-                        System.out.print("\uD83D\uDFE5 "); // Hit
-                    } else if (playerShipLocations[i][j] == 3) {
-                        System.out.print("⬜ "); // Miss
-                    }else if (playerShipLocations[i][j] == 5) {
-                        System.out.print("\uD83D\uDFEB "); // Sunk
+            if (gameMode == 1) {
+                System.out.print(".");
+            } else {
+                System.out.println("This is where you've shot");
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 10; j++) {
+                        if (playerShipLocations[i][j] == 0 | playerShipLocations[i][j] == 1) {
+                            System.out.print("\uD83D\uDFE6 "); // Water
+                        } else if (playerShipLocations[i][j] == 2) {
+                            System.out.print("\uD83D\uDFE5 "); // Hit
+                        } else if (playerShipLocations[i][j] == 3) {
+                            System.out.print("⬜ "); // Miss
+                        } else if (playerShipLocations[i][j] == 5) {
+                            System.out.print("\uD83D\uDFEB "); // Sunk
+                        }
                     }
+                    System.out.println();
                 }
-                System.out.println();
             }
         }
     }
